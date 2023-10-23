@@ -1,0 +1,24 @@
+{
+  "name": "box_nuxt_vercel",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/laaners/ygobox_nuxt_vercel.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/laaners/ygobox_nuxt_vercel/issues"
+  },
+  "homepage": "https://github.com/laaners/ygobox_nuxt_vercel#readme",
+  "dependencies": {
+    "axios": "^1.5.1",
+    "express": "^4.18.2"
+  }
+}
