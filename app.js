@@ -1,9 +1,11 @@
 const axios = require("axios");
 const express = require("express");
+const cors = require('cors');
 
 const PORT = 4000;
 
 const app = express();
+app.use(cors()); 
 
 app.get("/", (req, res) => {
 	res.status(200).json("Welcome, your app is working well");
@@ -47,20 +49,21 @@ app.get("/decksFound/:id", async (req, res) => {
 				];
 			}
 		});
-		let ydk = "#created by Ale\n#main\n";
-		main.forEach((_) => (ydk += _ + "\n"));
-
-		ydk += "#extra\n";
-		extra.forEach((_) => (ydk += _ + "\n"));
-
-		ydk += "!side\n";
-		side.forEach((_) => (ydk += _ + "\n"));
-		console.log(ydk);
 	}
+	let ydk = "#created by Ale\n#main\n";
+	main.forEach((_) => (ydk += _ + "\n"));
+
+	ydk += "#extra\n";
+	extra.forEach((_) => (ydk += _ + "\n"));
+
+	ydk += "!side\n";
+	side.forEach((_) => (ydk += _ + "\n"));
+
 	return res.json({
 		main,
 		extra,
 		side,
+		ydk
 	});
 });
 
