@@ -96,11 +96,20 @@ app.get("/get_decks", async (req, res) => {
 
 app.post("/update_deck", async (req, res) => {
 	const { deckName, ydk } = req.body;
-	const d = new Date();
+	let d = new Date();
+	// Convert the local time to UTC
+	d = new Date(
+		d.getUTCFullYear(),
+		d.getUTCMonth(),
+		d.getUTCDate(),
+		d.getUTCHours(),
+		d.getUTCMinutes(),
+		d.getUTCSeconds()
+	);
 	const deck = {
 		ydk,
 		deckName,
-		date: d.toLocaleString('se-SE'),
+		date: d.toLocaleString("se-SE"),
 	};
 	const docRef = admin.firestore().collection("decks").doc(deckName);
 	docRef
@@ -110,7 +119,7 @@ app.post("/update_deck", async (req, res) => {
 				// Document exists, update it
 				return docRef.update({
 					ydk: ydk,
-					date: d.toLocaleString('se-SE'),
+					date: d.toLocaleString("se-SE"),
 				});
 			} else {
 				// Document does not exist, create it
