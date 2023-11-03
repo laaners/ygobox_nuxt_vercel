@@ -19,7 +19,13 @@
   "homepage": "https://github.com/laaners/ygobox_nuxt_vercel#readme",
   "dependencies": {
     "axios": "^1.5.1",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "express": "^4.18.2"
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "firebase-admin": "^11.11.0"
+  },
+  "devDependencies": {
+    "firebase": "^10.5.2"
   }
 }

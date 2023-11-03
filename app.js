@@ -1,11 +1,21 @@
 const axios = require("axios");
 const express = require("express");
 const cors = require("cors");
+const admin = require("firebase-admin");
+const bodyParser = require("body-parser");
+require("dotenv").config();
 
+const serviceAccount = JSON.parse(process.env.privateKey);
+
+admin.initializeApp({
+	credential: admin.credential.cert(serviceAccount),
+});
 const PORT = 4000;
 
 const app = express();
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
 
 app.get("/", (req, res) => {
 	res.status(200).json("Welcome, your app is working well");
@@ -74,6 +84,43 @@ app.get("/decksFound/:id", async (req, res) => {
 			ydk: "",
 		});
 	}
+});
+
+app.get("/get_decks", async (req, res) => {
+	const decksRef = admin.firestore().collection("decks");
+	const snapshot = await decksRef.get();
+	const ris = [];
+	snapshot.forEach((doc) => ris.push(doc.data()));
+	return res.send(ris);
+});
+
+app.post("/update_deck", async (req, res) => {
+	const { deckName, ydk } = req.body;
+	const d = new Date();
+	const deck = {
+		ydk,
+		deckName,
+		date: d.toLocaleString('se-SE'),
+	};
+	const docRef = admin.firestore().collection("decks").doc(deckName);
+	docRef
+		.get()
+		.then((doc) => {
+			if (doc.exists) {
+				// Document exists, update it
+				return docRef.update({
+					ydk: ydk,
+					date: d.toLocaleString('se-SE'),
+				});
+			} else {
+				// Document does not exist, create it
+				return docRef.set(deck);
+			}
+		})
+		.catch((error) => {
+			console.log("Error deck updating:", error);
+		});
+	return res.send("Success deck updating");
 });
 
 app.listen(PORT, () => {
