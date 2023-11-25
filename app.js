@@ -92,7 +92,7 @@ app.get("/decksFoundOne/:id", async (req, res) => {
 		const { data } = await axios.get(
 			`https://ygoprodeck.com/api/card/decksFound.php?cardnumber=${card}`
 		);
-		const deck = idsList.sort(() => Math.random() - 0.5)[0]
+		const deck = data.sort(() => Math.random() - 0.5)[0]
 		let main = [];
 		let extra = [];
 		let side = [];
