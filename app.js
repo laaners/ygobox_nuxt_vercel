@@ -86,6 +86,72 @@ app.get("/decksFound/:id", async (req, res) => {
 	}
 });
 
+app.get("/decksFoundOne/:id", async (req, res) => {
+	const card = req.params.id;
+	try {
+		const { data } = await axios.get(
+			`https://ygoprodeck.com/api/card/decksFound.php?cardnumber=${card}`
+		);
+		const deck = idsList.sort(() => Math.random() - 0.5)[0]
+		let main = [];
+		let extra = [];
+		let side = [];
+
+		const resp = await axios.get(
+			`https://ygoprodeck.com/deck/${deck.pretty_url}`
+		);
+		resp.data.split("\n").forEach((_) => {
+			if (_.includes("var maindeckjs = '")) {
+				main = [
+					...main,
+					...JSON.parse(
+						_.split("var maindeckjs = '")[1].replace("';", "")
+					),
+				];
+			}
+			if (_.includes("var extradeckjs = '")) {
+				extra = [
+					...extra,
+					...JSON.parse(
+						_.split("var extradeckjs = '")[1].replace("';", "")
+					),
+				];
+			}
+			if (_.includes("var sidedeckjs = '")) {
+				side = [
+					...side,
+					...JSON.parse(
+						_.split("var sidedeckjs = '")[1].replace("';", "")
+					),
+				];
+			}
+		});
+
+		let ydk = "#created by Ale\n#main\n";
+		main.forEach((_) => (ydk += _ + "\n"));
+
+		ydk += "#extra\n";
+		extra.forEach((_) => (ydk += _ + "\n"));
+
+		ydk += "!side\n";
+		side.forEach((_) => (ydk += _ + "\n"));
+
+		return res.json({
+			main,
+			extra,
+			side,
+			ydk,
+		});
+	} catch (e) {
+		return res.json({
+			main: [],
+			extra: [],
+			side: [],
+			ydk: "",
+		});
+	}
+});
+
 app.get("/get_decks", async (req, res) => {
 	const decksRef = admin.firestore().collection("decks");
 	const snapshot = await decksRef.get();
