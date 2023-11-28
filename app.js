@@ -89,17 +89,35 @@ app.get("/decksFound/:id", async (req, res) => {
 app.get("/decksFoundOne/:id", async (req, res) => {
 	const card = req.params.id;
 	try {
-		const { data } = await axios.get(
+		let { data } = await axios.get(
 			`https://ygoprodeck.com/api/card/decksFound.php?cardnumber=${card}`
 		);
-		const deck = data.sort(() => Math.random() - 0.5)[0]
+		data = data.filter((_) =>
+			[
+				"Common Charity Decks",
+				"Fun/Casual Decks",
+				"Non-Meta Decks",
+				"Theorycrafting Decks",
+				"Meta Decks",
+				"Tournament Meta Decks",
+			].includes(_.format)
+		);
+		if (data.length === 0)
+			return res.json({
+				main: [],
+				extra: [],
+				side: [],
+				ydk: "",
+				deck_name: "",
+				url: ""
+			});
+		const deck = data.sort(() => Math.random() - 0.5)[0];
 		let main = [];
 		let extra = [];
 		let side = [];
 
-		const resp = await axios.get(
-			`https://ygoprodeck.com/deck/${deck.pretty_url}`
-		);
+		const url = `https://ygoprodeck.com/deck/${deck.pretty_url}`;
+		const resp = await axios.get(url);
 		resp.data.split("\n").forEach((_) => {
 			if (_.includes("var maindeckjs = '")) {
 				main = [
@@ -141,6 +159,8 @@ app.get("/decksFoundOne/:id", async (req, res) => {
 			extra,
 			side,
 			ydk,
+			deck_name: deck.deck_name,
+			url
 		});
 	} catch (e) {
 		return res.json({
@@ -148,6 +168,8 @@ app.get("/decksFoundOne/:id", async (req, res) => {
 			extra: [],
 			side: [],
 			ydk: "",
+			deck_name: "",
+			url: ""
 		});
 	}
 });
