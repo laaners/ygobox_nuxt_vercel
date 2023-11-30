@@ -175,7 +175,7 @@ app.get("/decksFoundOne/:id", async (req, res) => {
 });
 
 app.get("/get_decks", async (req, res) => {
-	const decksRef = admin.firestore().collection("decks");
+	const decksRef = admin.firestore().collection("decks_random");
 	const snapshot = await decksRef.get();
 	const ris = [];
 	snapshot.forEach((doc) => ris.push(doc.data()));
@@ -199,7 +199,7 @@ app.post("/update_deck", async (req, res) => {
 		deckName,
 		date: d.toLocaleString("se-SE"),
 	};
-	const docRef = admin.firestore().collection("decks").doc(deckName);
+	const docRef = admin.firestore().collection("decks_random").doc(deckName);
 	docRef
 		.get()
 		.then((doc) => {
