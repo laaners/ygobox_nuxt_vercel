@@ -92,16 +92,24 @@ app.get("/decksFoundOne/:id", async (req, res) => {
 		let { data } = await axios.get(
 			`https://ygoprodeck.com/api/card/decksFound.php?cardnumber=${card}`
 		);
-		data = data.filter((_) =>
-			[
-				"Common Charity Decks",
-				"Fun/Casual Decks",
-				"Non-Meta Decks",
-				"Theorycrafting Decks",
-				"Meta Decks",
-				"Tournament Meta Decks",
-			].includes(_.format)
-		);
+		data = data.filter((deck) => {
+			return (
+				[
+					"Common Charity Decks",
+					"Fun/Casual Decks",
+					"Non-Meta Decks",
+					"Theorycrafting Decks",
+					"Meta Decks",
+					"Tournament Meta Decks",
+				].includes(deck.format) &&
+				!(
+					deck.deck_name.toLowerCase().includes("draft") ||
+					deck.deck_name.toLowerCase().includes("prog") ||
+					deck.deck_name.toLowerCase().includes("edison") ||
+					deck.deck_name.toLowerCase().includes("masochist")
+				)
+			);
+		});
 		if (data.length === 0)
 			return res.json({
 				main: [],
@@ -109,59 +117,78 @@ app.get("/decksFoundOne/:id", async (req, res) => {
 				side: [],
 				ydk: "",
 				deck_name: "",
-				url: ""
+				url: "",
 			});
-		const deck = data.sort(() => Math.random() - 0.5)[0];
-		let main = [];
-		let extra = [];
-		let side = [];
 
-		const url = `https://ygoprodeck.com/deck/${deck.pretty_url}`;
-		const resp = await axios.get(url);
-		resp.data.split("\n").forEach((_) => {
-			if (_.includes("var maindeckjs = '")) {
-				main = [
-					...main,
-					...JSON.parse(
-						_.split("var maindeckjs = '")[1].replace("';", "")
-					),
-				];
+		const decks = data.sort(() => Math.random() - 0.5);
+		let i = 0
+		for (const deck of decks) {
+			let main = [];
+			let extra = [];
+			let side = [];
+
+			const url = `https://ygoprodeck.com/deck/${deck.pretty_url}`;
+			const resp = await axios.get(url);
+			resp.data.split("\n").forEach((_) => {
+				if (_.includes("var maindeckjs = '")) {
+					main = [
+						...main,
+						...JSON.parse(
+							_.split("var maindeckjs = '")[1].replace("';", "")
+						),
+					];
+				}
+				if (_.includes("var extradeckjs = '")) {
+					extra = [
+						...extra,
+						...JSON.parse(
+							_.split("var extradeckjs = '")[1].replace("';", "")
+						),
+					];
+				}
+				if (_.includes("var sidedeckjs = '")) {
+					side = [
+						...side,
+						...JSON.parse(
+							_.split("var sidedeckjs = '")[1].replace("';", "")
+						),
+					];
+				}
+			});
+
+			// Check if highlander
+			const filtered = [
+				...main,
+				// ...suggestions.side,
+				...extra,
+			];
+			const counts = {};
+			for (const cardId of filtered) {
+				counts[cardId] = counts[cardId] ? counts[cardId] + 1 : 1;
 			}
-			if (_.includes("var extradeckjs = '")) {
-				extra = [
-					...extra,
-					...JSON.parse(
-						_.split("var extradeckjs = '")[1].replace("';", "")
-					),
-				];
+			if (Math.max(...Object.entries(counts).map((_) => _[1])) !== 3) {
+				console.log("Highlander: " + url);
+				continue;
 			}
-			if (_.includes("var sidedeckjs = '")) {
-				side = [
-					...side,
-					...JSON.parse(
-						_.split("var sidedeckjs = '")[1].replace("';", "")
-					),
-				];
-			}
-		});
 
-		let ydk = "#created by Ale\n#main\n";
-		main.forEach((_) => (ydk += _ + "\n"));
+			let ydk = "#created by Ale\n#main\n";
+			main.forEach((_) => (ydk += _ + "\n"));
 
-		ydk += "#extra\n";
-		extra.forEach((_) => (ydk += _ + "\n"));
+			ydk += "#extra\n";
+			extra.forEach((_) => (ydk += _ + "\n"));
 
-		ydk += "!side\n";
-		side.forEach((_) => (ydk += _ + "\n"));
+			ydk += "!side\n";
+			side.forEach((_) => (ydk += _ + "\n"));
 
-		return res.json({
-			main,
-			extra,
-			side,
-			ydk,
-			deck_name: deck.deck_name,
-			url
-		});
+			return res.json({
+				main,
+				extra,
+				side,
+				ydk,
+				deck_name: deck.deck_name,
+				url,
+			});
+		}
 	} catch (e) {
 		return res.json({
 			main: [],
@@ -169,7 +196,7 @@ app.get("/decksFoundOne/:id", async (req, res) => {
 			side: [],
 			ydk: "",
 			deck_name: "",
-			url: ""
+			url: "",
 		});
 	}
 });
