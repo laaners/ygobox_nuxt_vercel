@@ -121,7 +121,7 @@ app.get("/decksFoundOne/:id", async (req, res) => {
 			});
 
 		const decks = data.sort(() => Math.random() - 0.5);
-		let i = 0
+		let i = 0;
 		for (const deck of decks) {
 			let main = [];
 			let extra = [];
@@ -189,6 +189,14 @@ app.get("/decksFoundOne/:id", async (req, res) => {
 				url,
 			});
 		}
+		return res.json({
+			main: [],
+			extra: [],
+			side: [],
+			ydk: "",
+			deck_name: "",
+			url: "",
+		});
 	} catch (e) {
 		return res.json({
 			main: [],
