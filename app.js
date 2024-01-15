@@ -255,6 +255,23 @@ app.post("/update_deck", async (req, res) => {
 	return res.send("Success deck updating");
 });
 
+app.post("/delete_deck", async (req, res) => {
+	const { deckName } = req.body;
+	const docRef = admin.firestore().collection("decks_random").doc(deckName);
+	docRef
+		.get()
+		.then((doc) => {
+			if (doc.exists) {
+				// Document exists, update it
+				return docRef.delete();
+			}
+		})
+		.catch((error) => {
+			console.log("Error deck deleting:", error);
+		});
+	return res.send("Success deck deleting");
+});
+
 app.listen(PORT, () => {
 	console.log(`Server running at http://localhost:${PORT}`);
 });
