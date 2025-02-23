@@ -272,6 +272,46 @@ app.post("/delete_deck", async (req, res) => {
 	return res.send("Success deck deleting");
 });
 
+app.get("/get_availabilities", async (req, res) => {
+	const availabilitiesRef = admin.firestore().collection("availabilities");
+	const snapshot = await availabilitiesRef.get();
+	const ris = [];
+	snapshot.forEach((doc) => ris.push(doc.data()));
+	console.log(ris)
+	return res.send(ris);
+});
+
+app.post("/update_availabilities", async (req, res) => {
+	console.log(req.body)
+
+	const { duelist, availabilities } = req.body;
+
+	const obj = {
+		duelist,
+		availabilities
+	};
+
+	const docRef = admin.firestore().collection("availabilities").doc(duelist);
+	docRef
+		.get()
+		.then((doc) => {
+			if (doc.exists) {
+				// Document exists, update it
+				return docRef.update({
+					availabilities: availabilities,
+				});
+			} else {
+				// Document does not exist, create it
+				return docRef.set(obj);
+			}
+		})
+		.catch((error) => {
+			console.log("Error availabilities updating:", error);
+		});
+	return res.send("Success availabilities updating");
+});
+
+
 app.listen(PORT, () => {
 	console.log(`Server running at http://localhost:${PORT}`);
 });
