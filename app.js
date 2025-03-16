@@ -272,6 +272,8 @@ app.post("/delete_deck", async (req, res) => {
 	return res.send("Success deck deleting");
 });
 
+// ---------------------------------------------------------------------
+
 app.get("/get_availabilities", async (req, res) => {
 	const availabilitiesRef = admin.firestore().collection("availabilities");
 	const snapshot = await availabilitiesRef.get();
@@ -309,6 +311,67 @@ app.post("/update_availabilities", async (req, res) => {
 			console.log("Error availabilities updating:", error);
 		});
 	return res.send("Success availabilities updating");
+});
+
+// ---------------------------------------------------------------------
+
+async function getAllProposals() {
+	const proposalsRef = admin.firestore().collection("proposals");
+	const snapshot = await proposalsRef.get();
+	const ris = [];
+	snapshot.forEach((doc) => ris.push(doc.data()));
+	return ris;
+}
+
+app.get("/get_proposals", async (req, res) => {
+	const ris = await getAllProposals()
+	return res.send(ris);
+});
+
+app.post("/update_proposal", async (req, res) => {
+	console.log(req.body)
+
+	const obj = req.body;
+
+	const docRef = admin.firestore().collection("proposals").doc(obj.id);
+	const doc = await docRef.get()
+	if (doc.exists) {
+		// Document exists, update it
+		await docRef.update({
+			votes: obj.votes,
+		});
+	} else {
+		// Document does not exist, create it
+		await docRef.set(obj);
+	}
+
+	return res.send("Success proposal updating");
+
+	/*
+	docRef
+		.get()
+		.then((doc) => {
+			if (doc.exists) {
+				// Document exists, update it
+				return docRef.update({
+					votes: obj.votes,
+				});
+			} else {
+				// Document does not exist, create it
+				return docRef.set(obj);
+			}
+		})
+		.catch((error) => {
+			console.log("Error proposal updating:", error);
+		});
+	*/
+
+	const ris = await getAllProposals()
+	console.log("-------------------------")
+	console.log(ris)
+	return res.send(ris);
+
+	// return res.send("Success proposal updating");
 });
 
 
